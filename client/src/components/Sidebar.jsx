@@ -22,7 +22,7 @@ const Sidebar = ({ onClose, darkMode }) => {
     <div className={`w-64 h-screen flex flex-col ${darkMode ? 'bg-gray-800 text-gray-100' : 'bg-indigo-900 text-white'}`}>
       <div className="p-6 flex items-center gap-3 cursor-pointer" onClick={() => handleNavigation('/')}>
         <Church className="w-8 h-8" />
-        <span className="text-xl font-bold">The Vault</span>
+        <span className="text-xl font-bold">Vault Reg</span>
       </div>
       
       <nav className="flex-1 px-4 py-6">
