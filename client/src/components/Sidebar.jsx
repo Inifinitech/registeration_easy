@@ -7,7 +7,7 @@ const Sidebar = ({ onClose, darkMode }) => {
   const location = useLocation();
 
   const menuItems = [
-    { icon: Users, label: 'Members', path: '/members' },
+    { icon: Users, label: 'Vaultizens', path: '/members' },
     { icon: CalendarCheck, label: 'Attendance', path: '/attendance' },
     { icon: BarChart3, label: 'Analytics', path: '/analytics' },
     { icon: Settings, label: 'Settings', path: '/settings' }
@@ -48,7 +48,7 @@ const Sidebar = ({ onClose, darkMode }) => {
             <span className="text-sm font-medium">JD</span>
           </div>
           <div className="flex-1">
-            <p className="text-sm font-medium">John Doe</p>
+            <p className="text-sm font-medium">Vault Reg</p>
             <p className="text-xs text-gray-400">Admin</p>
           </div>
         </div>

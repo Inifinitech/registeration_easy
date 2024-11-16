@@ -1,56 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { Edit2, Trash2, UserPlus } from 'lucide-react';
 import MemberForm from './MemberForm';
 
 const MembersList = ({ darkMode }) => {
-  const [members, setMembers] = useState([
-    {
-      id: 1,
-      firstName: 'John',
-      lastName: 'Doe',
-      gender: 'Male',
-      DOB: '2000-01-01',
-      location: 'Nairobi',
-      phone: '123-456-7890',
-      isStudent: true,
-      school: 'Nairobi University',
-      isVisitor: false,
-      willBeComing: false,
-      occupation: 'Engineer',
-      group: 'Transformers',
-      leader: false,
-      emergencyContact: {
-        name: 'Jane Doe',
-        phone: '987-654-3210',
-        relation: 'Sister',
-      },
-    },
-    {
-      id: 2,
-      firstName: 'Jane',
-      lastName: 'Smith',
-      gender: 'Female',
-      DOB: '1998-05-15',
-      location: 'Mombasa',
-      phone: '987-654-3210',
-      isStudent: false,
-      school: '',
-      isVisitor: true,
-      willBeComing: true,
-      occupation: 'Artist',
-      group: 'Visionaries',
-      leader: true,
-      emergencyContact: {
-        name: 'John Smith',
-        phone: '123-456-7890',
-        relation: 'Brother',
-      },
-    },
-  ]);
-
+  const [members, setMembers] = useState([]);
   const [selectedMember, setSelectedMember] = useState(null);
   const [showForm, setShowForm] = useState(false);
+
+  useEffect(() => {
+    const fetchMembers = async () => {
+      try {
+        const response = await fetch('http://127.0.0.1:5000/members');
+        const data = await response.json();
+        setMembers(data);
+      } catch (error) {
+        console.error('Error fetching members:', error);
+      }
+    };
+
+    fetchMembers();
+  }, []);
 
   const handleEdit = (member) => {
     setSelectedMember(member);
@@ -119,7 +89,8 @@ const MembersList = ({ darkMode }) => {
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Phone</th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">DOB</th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">School</th>
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">E-Contact</th>
+              {/* <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">E-Contact Name</th> */}
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">E-Contact Phone</th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
@@ -128,15 +99,15 @@ const MembersList = ({ darkMode }) => {
               <tr key={member.id}>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className={`text-sm font-medium ${darkMode ? 'text-gray-100' : 'text-gray-900'}`}>
-                    {member.firstName} {member.lastName}
+                    {member.first_name} {member.last_name}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{member.group}</div>
+                  <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{member.group_name}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                    {member.gender}
+                    {member.gender_enum}
                   </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
@@ -146,16 +117,25 @@ const MembersList = ({ darkMode }) => {
                   <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{member.phone}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{format(new Date(member.DOB), 'MMM d, yyyy')}</div>
+                  <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>{format(new Date(member.dob), 'MMM d, yyyy')}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
                     {member.school}
                   </div>
                 </td>
+                {/* <td className="px-6 py-4 whitespace-nowrap">
+                  <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
+                    {member.emergency_contact_name && member.emergency_contact_name !== 'N/A'
+                      ? member.emergency_contact_name
+                      : 'N/A'}
+                  </div>
+                </td> */}
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                    {member.emergencyContact.phone}
+                    {member.emergency_contact_phone && member.emergency_contact_phone !== 'N/A'
+                      ? member.emergency_contact_phone
+                      : 'N/A'}
                   </div>
                 </td>
 

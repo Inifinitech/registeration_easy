@@ -2,6 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy_serializer import SerializerMixin
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy import Enum
+from sqlalchemy.dialects.sqlite import JSON
 
 db=SQLAlchemy()
 
@@ -20,6 +21,7 @@ class Group(db.Model,SerializerMixin):
 class Member(db.Model,SerializerMixin):
     __tablename__='members'
     serialize_rules=('-group.members','-attendances.member','-memberevents.member',)
+    
     id=db.Column(db.Integer,primary_key=True)
     first_name=db.Column(db.String,nullable=False)
     last_name=db.Column(db.String,nullable=False)
@@ -35,10 +37,9 @@ class Member(db.Model,SerializerMixin):
     
     group_id=db.Column(db.Integer,db.ForeignKey('groups.id'))
 
-    
-
     memberevents=db.relationship('MemberEvent',back_populates='member')
-    events=association_proxy('memberevents','event')
+    events=association_proxy('memberevents','eveont')
+    emergency_contacts = db.relationship('EmergencyContact', back_populates='members')
     
 
     #one to many with Group
@@ -49,6 +50,19 @@ class Member(db.Model,SerializerMixin):
 
     def __repr__(self):
         return f'<id {self.id},first_name{self.first_name},last_name{self.last_name},dob{self.dob},location{self.location},phone{self.phone},occupation{self.occupation}>'
+    
+class EmergencyContact(db.Model, SerializerMixin):
+    __tablename__ = 'emergency_contacts'
+
+    serialize_rules = ('-members')
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, nullable=False)
+    phone = db.Column(db.String, nullable=False)
+    relation = db.Column(db.String, nullable=False)
+    member_id = db.Column(db.Integer, db.ForeignKey('members.id'))
+
+    members = db.relationship('Member', back_populates='emergency_contacts')
     
     
 class Attendance(db.Model,SerializerMixin):

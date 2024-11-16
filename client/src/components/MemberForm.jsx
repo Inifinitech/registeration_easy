@@ -29,10 +29,10 @@ const MemberForm = ({ darkMode }) => {
             lastName: Yup.string().required('Required'),
             DOB: Yup.date().required('Required'),
             location: Yup.string().required('Required'),
-            phone: Yup.string().required('Required'),
-            occupation: Yup.string().required('Required'),
-            group: Yup.string().required('Required'),
-            gender: Yup.string().required('Required'),
+            // phone: Yup.string().required('Required'),
+            // occupation: Yup.string().required('Required'),
+            // group: Yup.string().required('Required'),
+            // gender: Yup.string().required('Required'),
             emergencyContact: Yup.object({
                 name: Yup.string().required('Required'),
                 phone: Yup.string().required('Required'),
@@ -53,12 +53,12 @@ const MemberForm = ({ darkMode }) => {
                     is_visitor: values.isVisitor,
                     will_be_coming: values.isVisitor ? values.willBeComing : false,
                     occupation: values.occupation,
-                    group: values.group,
-                    gender: values.gender,
-                    emergency_contact: values.emergencyContact,
+                    group_id: values.group,
+                    gender_enum: values.gender,
+                    emergency_contact_id: [ values.emergencyContact],
                 };
 
-                const response = await fetch('http://127.0.0.1:5555/adminregistry', {
+                const response = await fetch('http://127.0.0.1:5000/adminregistry', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -70,7 +70,8 @@ const MemberForm = ({ darkMode }) => {
                     toast.success('Member registered successfully!');
                     resetForm();
                 } else {
-                    toast.error('Failed to register member. Please try again.');
+                    const errorData = await response.json();
+                    toast.error(`Failed to register member. ${errorData.error || 'Please try again.'}`);
                 }
             } catch (err) {
                 console.error(err);
@@ -92,13 +93,13 @@ const MemberForm = ({ darkMode }) => {
                     <InputField formik={formik} name="DOB" label="Date of Birth" type="date" darkMode={darkMode} />
                     <InputField formik={formik} name="location" label="Location" darkMode={darkMode} />
                     <InputField formik={formik} name="phone" label="Phone" type="tel" darkMode={darkMode} />
-                    <CheckboxField formik={formik} name="isStudent" label="Is Student?" darkMode={darkMode} />
+                    <CheckboxField formik={formik} name="isStudent" label="Student?" darkMode={darkMode} />
                     {formik.values.isStudent && <InputField formik={formik} name="school" label="School Name" darkMode={darkMode} />}
-                    <CheckboxField formik={formik} name="isVisitor" label="Is Visitor?" darkMode={darkMode} />
+                    <CheckboxField formik={formik} name="isVisitor" label="Visitor?" darkMode={darkMode} />
                     {formik.values.isVisitor && <CheckboxField formik={formik} name="willBeComing" label="Will be coming again?" darkMode={darkMode} />}
                     <InputField formik={formik} name="occupation" label="Occupation" darkMode={darkMode} />
                     <SelectField formik={formik} name="group" label="AG Group" options={["Transformers", "Relentless", "Innovators", "Pacesetters", "Ignition", "Gifted", "Visionaries", "Elevated"]} darkMode={darkMode} />
-                    <CheckboxField formik={formik} name="leader" label="Is a Leader?" darkMode={darkMode} />
+                    <CheckboxField formik={formik} name="leader" label="Leader?" darkMode={darkMode} />
                     <fieldset className="col-span-1 md:col-span-2 mt-6">
                         <legend className={`text-lg font-medium ${darkMode ? 'text-gray-100' : 'text-gray-800'} mb-4`}>Emergency Contact</legend>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -120,7 +121,6 @@ const MemberForm = ({ darkMode }) => {
     );
 }
 
-// Helper components with dark mode support
 
 const InputField = ({ formik, name, label, type = "text", darkMode }) => (
     <div>
@@ -166,20 +166,19 @@ const SelectField = ({ formik, name, label, options, darkMode }) => (
 const RadioField = ({ formik, name, label, options, darkMode }) => (
     <div>
         <label className={`block mb-1 font-medium ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>{label}</label>
-        <div className="flex gap-4">
-            {options.map((option, index) => (
-                <div key={index} className="flex items-center">
+        <div className="flex items-center space-x-4">
+            {options.map((option) => (
+                <label key={option} className={`flex items-center ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>
                     <input
                         type="radio"
-                        id={`${name}-${option}`}
                         name={name}
                         value={option}
                         checked={formik.values[name] === option}
                         onChange={formik.handleChange}
-                        className={`h-4 w-4 ${darkMode ? 'text-blue-600' : 'text-blue-600'} border-gray-300`}
+                        className={`mr-2 h-4 w-4 ${darkMode ? 'text-blue-600' : 'text-blue-600'} focus:ring-blue-500`}
                     />
-                    <label htmlFor={`${name}-${option}`} className={`ml-2 ${darkMode ? 'text-gray-200' : 'text-gray-700'}`}>{option}</label>
-                </div>
+                    {option}
+                </label>
             ))}
         </div>
     </div>

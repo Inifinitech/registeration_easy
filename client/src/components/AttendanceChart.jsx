@@ -36,7 +36,6 @@ function AttendanceChart({ darkMode }) {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Use mock data instead of fetching from API
     setTotalMembers(mockData.totalMembers);
     setAttendancePercentage(mockData.attendancePercentage);
     setAbsentMembers(mockData.absentMembers);
