@@ -20,7 +20,7 @@ class Member(db.Model, SerializerMixin):
     surname = db.Column(db.String(), nullable=True)
     gender = db.Column(db.String(), nullable=False)
     phone_number = db.Column(db.String(), nullable=False)
-    date_of_birth = db.Column(db.DateTime(), nullable=True)
+    date_of_birth = db.Column(db.Date(), nullable=True)
     location = db.Column(db.String(), nullable=False)
     school_type = db.Column(db.String(), nullable=False)
     school = db.Column(db.String(), nullable=False)
