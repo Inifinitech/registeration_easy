@@ -89,8 +89,7 @@ const MembersList = ({ darkMode }) => {
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Phone</th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">DOB</th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">School</th>
-              {/* <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">E-Contact Name</th> */}
-              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">E-Contact Phone</th>
+              <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">E-Contact</th>
               <th className="px-6 py-3 text-left text-xs font-medium uppercase tracking-wider">Actions</th>
             </tr>
           </thead>
@@ -124,18 +123,11 @@ const MembersList = ({ darkMode }) => {
                     {member.school}
                   </div>
                 </td>
-                {/* <td className="px-6 py-4 whitespace-nowrap">
-                  <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                    {member.emergency_contact_name && member.emergency_contact_name !== 'N/A'
-                      ? member.emergency_contact_name
-                      : 'N/A'}
-                  </div>
-                </td> */}
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className={`text-sm ${darkMode ? 'text-gray-400' : 'text-gray-500'}`}>
-                    {member.emergency_contact_phone && member.emergency_contact_phone !== 'N/A'
-                      ? member.emergency_contact_phone
-                      : 'N/A'}
+                    {member.emergency_contacts && member.emergency_contacts.length > 0
+                  ? `${member.emergency_contacts[0].name} - ${member.emergency_contacts[0].phone} (${member.emergency_contacts[0].relation})`
+                  : 'N/A'}
                   </div>
                 </td>
 
