@@ -3,6 +3,7 @@ from sqlalchemy_serializer import SerializerMixin
 from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy import Enum
 from sqlalchemy.dialects.sqlite import JSON
+from datetime import datetime
 
 db=SQLAlchemy()
 
@@ -34,6 +35,7 @@ class Member(db.Model,SerializerMixin):
     is_visitor = db.Column(db.Boolean, default=False)
     school = db.Column(db.String, nullable=True)
     occupation = db.Column(db.String, nullable=False)
+    created_at = db.Column(db.DateTime)
     
     group_id=db.Column(db.Integer,db.ForeignKey('groups.id'))
 

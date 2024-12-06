@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from datetime import datetime, timedelta
 from flask_bcrypt import Bcrypt
-from sqlalchemy import func
+from sqlalchemy import func, desc
 from flask_cors import CORS
 
 from models import db,Group,Attendance,Member,MemberEvent,Event,Admin, EmergencyContact
@@ -39,7 +39,93 @@ def before_login():
             
         )
 
+class AdminRegistry(Resource):
+    def post(self):
+        data = request.get_json()
 
+        dob_str = data['dob']
+        dob = datetime.strptime(dob_str, '%Y-%m-%d').date()
+
+        # Create a new member instance
+        new_member = Member(
+            first_name=data['first_name'],
+            last_name=data['last_name'],
+            gender_enum=data['gender_enum'],
+            dob=dob,
+            location=data['location'],
+            phone=data['phone'],
+            is_student=data['is_student'],
+            will_be_coming=data['will_be_coming'],
+            is_visitor=data['is_visitor'],
+            school=data.get('school'),
+            occupation=data['occupation'],
+            group_id=data['group_id'],
+            created_at=datetime.now()
+        )
+
+        try:
+            db.session.add(new_member)
+            db.session.commit()  # Commit to generate the new_member.id
+        except Exception as e:
+            db.session.rollback()
+            return {'error': f"Failed to save member: {str(e)}"}, 500
+
+        # Add emergency contacts with the new member's ID
+        emergency_contacts = data.get("emergency_contact_id", [])
+        for emergency_contact in emergency_contacts:
+            emergency_contact_data = EmergencyContact(
+                name=emergency_contact.get('name'),
+                phone=emergency_contact.get('phone'),
+                relation=emergency_contact.get('relation'),
+                member_id=new_member.id  # Use the ID of the newly created member
+            )
+            db.session.add(emergency_contact_data)
+
+        # Commit the emergency contacts
+        try:
+            db.session.commit()
+            return make_response(new_member.to_dict(rules=('-group.members', )), 201)
+        except Exception as e:
+            db.session.rollback()
+            return {'error': f"Failed to save emergency contacts: {str(e)}"}, 500
+
+
+            
+    def get(self):
+        # members = [member.to_dict(rules=('-group.members','-attendances', '-events','-memberevents',)) for member in Member.query.all()]
+        # return members, 200
+        members_dict = []
+        
+        # Fetch the latest 5 members based on created_at
+        latest_members = Member.query.order_by(Member.created_at.desc()).limit(5).all()
+        
+        for member in latest_members:
+            member_info = member.to_dict(only=('first_name', 'last_name', 'gender_enum', 'dob', 'location',
+                                               'phone', 'is_student', 'will_be_coming', 'is_visitor', 'school', 'occupation'))
+
+            # Add group name
+            group_name = member.group.name if member.group else "No Group"
+
+            # Add emergency contacts
+            emergency_contact_info = []
+            for contact in member.emergency_contacts:
+                emergency_contact_info.append({
+                    'name': contact.name,
+                    'phone': contact.phone,
+                    'relation': contact.relation
+                })
+
+            # Update member_info with additional data
+            member_info.update({
+                'group_name': group_name,
+                "emergency_contacts": emergency_contact_info
+            })
+
+            members_dict.append(member_info)
+        
+        return make_response(members_dict, 200)
+
+    
 class HomeMembers(Resource):
 
      def get(self):
@@ -50,7 +136,7 @@ class HomeMembers(Resource):
             member_info = member.to_dict(only=('first_name', 'last_name','gender_enum','dob','location'
                                                ,'phone','is_student','will_be_coming','is_visitor','school','occupation'))
 
-            group_name = member.group.name
+            group_name = member.group.name 
             # 'emergency_contact_name': member.emergency_contacts.name,
             # 'emergency_contact_phone': member.emergency_contacts.phone 
 
@@ -83,90 +169,7 @@ class HomeMember_name(Resource):
                 "error": "member not found"
             }
             return make_response(response_body, 404)
-
-class AdminRegistry(Resource):
-    def post(self):
-        data = request.get_json()
-
-        # # Check for required fields
-        # required_fields = ['first_name', 'last_name', 'group_id']
-        # for field in required_fields:
-        #     if field not in data:
-        #         return {'error': f'Missing field: {field}'}, 400
-
-        # # Fetch the group instance
-        # group = db.session.get(Group, data['group_id'])
-        # if not group:
-        #     return {'error': 'Group not found.'}, 404
-
-        dob_str = data['dob']  # This is the string you received, e.g. "2000-01-01"
-        dob = datetime.strptime(dob_str, '%Y-%m-%d').date()
-
-        # Create a new member instance
-        new_member = Member(
-            first_name=data['first_name'],
-            last_name=data['last_name'],
-            gender_enum=data['gender_enum'],
-            dob=dob,
-            location=data['location'],
-            phone=data['phone'],
-            is_student=data['is_student'],
-            will_be_coming=data['will_be_coming'],
-            is_visitor=data['is_visitor'],
-            school=data.get('school'),
-            occupation=data['occupation'],
-            group_id=data['group_id']  
-        )
-
-        db.session.add(new_member)
         
-        emergency_contacts = data.get("emergency_contact_id", [])
-
-        for emergency_contact in emergency_contacts:
-            emergency_contact_data = EmergencyContact(
-                name=emergency_contact.get('name'),
-                phone=emergency_contact.get('phone'),
-                relation=emergency_contact.get('relation'),
-                member_id=new_member.id
-            )
-            db.session.add(emergency_contact_data) 
-
-        # # Handle emergency contact
-        # if 'emergency_contact' in data:
-        #     emergency_data = data['emergency_contact']
-        #     required_emergency_fields = ['name', 'phone', 'relation']
-            
-        #     for field in required_emergency_fields:
-        #         if field not in emergency_data:
-        #             return {'error': f'Missing field in emergency contact: {field}'}, 400
-
-        #     # Create the new emergency contact
-        #     new_emergency_contact = EmergencyContact(
-        #         name=emergency_data['name'],
-        #         phone=emergency_data['phone'],
-        #         relation=emergency_data['relation'],
-        #     )
-
-        #     # Manually assign the member to the emergency contact
-        #     new_emergency_contact.member = new_member
-        #     # Add the emergency contact to the member's list
-        #     new_member.emergency_contacts.append(new_emergency_contact)
-
-        try:
-            # Add new member and related emergency contact to the session
-           
-            db.session.commit()
-
-            return make_response(new_member.to_dict(rules=('-group.members', )), 201)
-        except Exception as e:
-            db.session.rollback()
-            return {'error': str(e)}, 500
-
-
-            
-    def get(self):
-        members = [member.to_dict(rules=('-group.members','-attendances', '-events','-memberevents',)) for member in Member.query.all()]
-        return members, 200
     
 class AdminMemberSearch(Resource):
     def get(self, id):
@@ -348,5 +351,6 @@ api.add_resource(Logout,'/logout')
 
 
 if __name__ == '__main__':
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=True)
+    # port = int(os.environ.get("PORT", 5000))
+    # app.run(host="0.0.0.0", port=port, debug=True)
+    app.run(port=5000, debug=True)
