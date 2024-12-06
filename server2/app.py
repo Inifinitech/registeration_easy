@@ -7,7 +7,7 @@ from models import db
 from contact1.contacts import contacts
 from members1.members import members
 from attendance.attendance import attendances
-
+from ag_group.ag_group import ag_group
 
 
 app = Flask(__name__)
@@ -18,6 +18,7 @@ app.json.compact = False
 app.register_blueprint(contacts)
 app.register_blueprint(members)
 app.register_blueprint(attendances)
+app.register_blueprint(ag_group)
 
 
 db.init_app(app)
