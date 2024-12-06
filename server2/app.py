@@ -6,6 +6,7 @@ from config import Config
 from models import db
 from contact1.contacts import contacts
 from members1.members import members
+from attendance.attendance import attendances
 
 
 
@@ -16,6 +17,7 @@ app.json.compact = False
 
 app.register_blueprint(contacts)
 app.register_blueprint(members)
+app.register_blueprint(attendances)
 
 
 db.init_app(app)

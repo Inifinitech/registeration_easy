@@ -57,13 +57,17 @@ class Members(Resource):
             ag_group_id = data["ag_group_id"],
         )
 
-        # # Getting the contacts of a member and appending them to the new member
-        # contacts = data.get("contacts", [])
-        # # looping through the contacts1 and appending them to the new member
-        # for contact in contacts:
-        #     contact_data = Contact(name = contact.get("name"))
-        #     # appending the image_data to the new member
-        #     new_member.contacts.append(contact_data)
+        # Getting the contacts of a member and appending them to the new member
+        contacts = data.get("contacts", [])
+        # looping through the contacts1 and appending them to the new member
+        for contact in contacts:
+            contact_data = Contact(
+                name = contact.get("name"),
+                phone_number= contact.get("phone_number"),
+                relationship = contact.get("relationship"),
+                member_id = contact.get("new_member.id"))
+            # appending the image_data to the new member
+            new_member.contacts.append(contact_data)
         
         if new_member:
             # adding and commiting the new member to the database 
@@ -91,7 +95,7 @@ class MemberById(Resource):
         member = Member.query.filter_by(id=id).first()
         if member:
             # converting the member to a dictionary format
-            member_to_dict = member.to_dict()
+            member_to_dict = member.to_dict(rules=("-ag_group",))
             #  creating and returning a respose 
             response = make_response(member_to_dict, 200)
             return response
